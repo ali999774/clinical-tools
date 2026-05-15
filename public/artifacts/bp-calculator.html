@@ -1,0 +1,341 @@
+<h2 class="sr-only">Pediatric Blood Pressure Classifier and Management Guide based on AAP 2017 guidelines</h2>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding:1.5rem 1rem 3rem}
+:root{--bg:#fff;--bg2:#f5f5f3;--bg3:#eeede9;--text:#1a1a1a;--text2:#555;--text3:#888;--border:#e0e0e0;--card:#fff;--accent:#1a6fbd;--accent-bg:#e6f1fb;--success:#1d7a3a;--success-bg:#eaf3de;--success-b:#1d7a3a;--warning:#b36200;--warning-bg:#faeeda;--warning-b:#b36200;--danger:#c0392b;--danger-bg:#fcebeb;--danger-b:#c0392b;--stage2-bg:#f7c1c1;--stage2:#7a1010;--stage2-b:#a32d2d;--input-bg:#f9f9f7;--tag:#e8e8e4;--tagtext:#444}
+[data-dark]{--bg:#1a1a1a;--bg2:#242424;--bg3:#2e2e2e;--text:#f0f0ee;--text2:#b0b0aa;--text3:#787870;--border:#3a3a38;--card:#242424;--accent:#6baee8;--accent-bg:#0c447c;--success:#5dcaa5;--success-bg:#085041;--success-b:#5dcaa5;--warning:#ef9f27;--warning-bg:#633806;--warning-b:#ef9f27;--danger:#f09595;--danger-bg:#501313;--danger-b:#f09595;--stage2-bg:#791f1f;--stage2:#f7c1c1;--stage2-b:#f09595;--input-bg:#2a2a2a;--tag:#303030;--tagtext:#b0b0aa}
+.card{background:var(--card);border:0.5px solid var(--border);border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:1rem}
+label{display:block;font-size:13px;color:var(--text2);margin-bottom:6px;font-weight:500}
+select,input[type=number]{width:100%;padding:8px 12px;border:0.5px solid var(--border);border-radius:8px;background:var(--input-bg);color:var(--text);font-size:15px;outline:none}
+select:focus,input[type=number]:focus{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 20%,transparent)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+button.classify-btn{width:100%;padding:10px;border:0.5px solid var(--border);border-radius:8px;background:var(--accent-bg);color:var(--accent);font-size:15px;font-weight:500;cursor:pointer;margin-top:4px}
+button.classify-btn:hover{opacity:.85}
+.result-card{border-radius:12px;padding:1.25rem 1.5rem;border:0.5px solid transparent;margin-top:1rem}
+.badge{display:inline-block;padding:4px 14px;border-radius:8px;font-size:13px;font-weight:500;margin-bottom:10px}
+.big-label{font-size:22px;font-weight:500;margin-bottom:4px}
+.sub{font-size:14px;color:var(--text2);line-height:1.6}
+.info-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:0.5px solid var(--border);font-size:14px;gap:8px}
+.info-row:last-child{border-bottom:none}
+.info-val{font-weight:500;color:var(--text);text-align:right}
+.toggle-btn{position:fixed;top:1rem;right:1rem;width:36px;height:36px;border-radius:50%;border:0.5px solid var(--border);background:var(--bg2);color:var(--text2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;z-index:100}
+h1{font-size:18px;font-weight:500;margin-bottom:4px;color:var(--text)}
+.hint{font-size:12px;color:var(--text3);margin-top:6px}
+.thresh-row{display:flex;justify-content:space-between;padding:4px 0;color:var(--text2);border-bottom:0.5px solid var(--border);font-size:13px;gap:8px}
+.thresh-row:last-child{border-bottom:none}
+.t-label{color:var(--text3);flex-shrink:0}
+/* Accordion */
+.accordion{border:0.5px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:1rem}
+.acc-header{width:100%;display:flex;justify-content:space-between;align-items:center;padding:14px 18px;background:var(--bg2);border:none;cursor:pointer;font-size:14px;font-weight:500;color:var(--text);text-align:left;gap:8px}
+.acc-header:hover{background:var(--bg3)}
+.acc-icon{font-size:12px;color:var(--text3);flex-shrink:0;transition:transform .2s}
+.acc-icon.open{transform:rotate(180deg)}
+.acc-body{display:none;padding:16px 18px;border-top:0.5px solid var(--border);background:var(--card)}
+.acc-body.open{display:block}
+/* Management content */
+.mgmt-section{margin-bottom:1.25rem}
+.mgmt-title{font-size:13px;font-weight:500;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em}
+.stage-block{border-radius:8px;padding:12px 14px;margin-bottom:10px;border:0.5px solid transparent}
+.stage-block.elevated{background:var(--warning-bg);border-color:var(--warning-b)}
+.stage-block.stage1{background:var(--danger-bg);border-color:var(--danger-b)}
+.stage-block.stage2{background:var(--stage2-bg);border-color:var(--stage2-b)}
+.stage-label{font-size:13px;font-weight:500;margin-bottom:6px}
+.stage-block.elevated .stage-label{color:var(--warning)}
+.stage-block.stage1 .stage-label{color:var(--danger)}
+.stage-block.stage2 .stage-label{color:var(--stage2)}
+.visit-row{font-size:13px;color:var(--text2);padding:4px 0;border-bottom:0.5px solid var(--border);display:flex;gap:8px}
+.visit-row:last-child{border-bottom:none}
+.visit-label{color:var(--text3);min-width:110px;flex-shrink:0;font-size:12px}
+.drug-table{width:100%;border-collapse:collapse;font-size:13px}
+.drug-table th{text-align:left;color:var(--text3);font-weight:500;padding:6px 8px;border-bottom:0.5px solid var(--border);font-size:12px}
+.drug-table td{padding:6px 8px;border-bottom:0.5px solid var(--border);color:var(--text2);vertical-align:top}
+.drug-table tr:last-child td{border-bottom:none}
+.drug-name{font-weight:500;color:var(--text)}
+.pearl-list{list-style:none;padding:0}
+.pearl-list li{font-size:13px;color:var(--text2);padding:5px 0;border-bottom:0.5px solid var(--border);display:flex;gap:8px;align-items:flex-start;line-height:1.5}
+.pearl-list li:last-child{border-bottom:none}
+.pearl-dot{color:var(--accent);flex-shrink:0;margin-top:1px}
+.cause-table{width:100%;border-collapse:collapse;font-size:13px}
+.cause-table td{padding:6px 8px;border-bottom:0.5px solid var(--border);color:var(--text2);vertical-align:top}
+.cause-table td:first-child{font-weight:500;color:var(--text);width:110px;flex-shrink:0}
+.cause-table tr:last-child td{border-bottom:none}
+.tag{display:inline-block;background:var(--tag);color:var(--tagtext);font-size:11px;padding:2px 8px;border-radius:6px;margin:2px}
+.highlight-box{background:var(--accent-bg);border:0.5px solid var(--accent);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--accent);margin-bottom:10px}
+</style>
+
+<button class="toggle-btn" id="themeBtn" aria-label="Toggle dark mode" onclick="toggleTheme()">☀</button>
+
+<div class="card">
+  <h1>Pediatric BP classifier</h1>
+  <p style="font-size:13px;color:var(--text3);margin-bottom:1.25rem">AAP 2017 guidelines · ages 1–17</p>
+
+  <div class="grid2" style="margin-bottom:12px">
+    <div>
+      <label>Sex</label>
+      <select id="sex"><option value="">Select</option><option value="M">Male</option><option value="F">Female</option></select>
+    </div>
+    <div>
+      <label>Age (years)</label>
+      <input type="number" id="age" min="1" max="17" placeholder="1–17">
+    </div>
+  </div>
+
+  <div style="margin-bottom:12px">
+    <label>Height percentile</label>
+    <select id="htpct">
+      <option value="">Select percentile</option>
+      <option value="5">5th</option><option value="10">10th</option><option value="25">25th</option>
+      <option value="50">50th</option><option value="75">75th</option><option value="90">90th</option><option value="95">95th</option>
+    </select>
+    <p class="hint">Not required for age ≥13. Use growth chart estimate if needed.</p>
+  </div>
+
+  <div class="grid2" style="margin-bottom:12px">
+    <div>
+      <label>Systolic BP (mmHg)</label>
+      <input type="number" id="sbp" min="60" max="220" placeholder="e.g. 118">
+    </div>
+    <div>
+      <label>Diastolic BP (mmHg)</label>
+      <input type="number" id="dbp" min="30" max="140" placeholder="e.g. 74">
+    </div>
+  </div>
+
+  <button class="classify-btn" onclick="classify()">Classify blood pressure</button>
+</div>
+
+<div id="output" style="display:none"></div>
+
+<!-- Management Guide Accordion -->
+<div class="accordion" id="mgmtAccordion">
+  <button class="acc-header" onclick="toggleAcc('mgmtBody','mgmtIcon')">
+    <span>Management guide — AAP 2017</span>
+    <span class="acc-icon" id="mgmtIcon">▼</span>
+  </button>
+  <div class="acc-body" id="mgmtBody">
+
+    <div class="mgmt-section">
+      <div class="mgmt-title">Follow-up by stage</div>
+      <div class="stage-block elevated">
+        <div class="stage-label">🟡 Elevated BP (90th–&lt;95th %ile or 120–129/&lt;80 in ≥13 yr)</div>
+        <div class="visit-row"><span class="visit-label">Visit 1</span><span>Confirm manually (2 readings). Begin lifestyle counseling. Recheck in 6 months.</span></div>
+        <div class="visit-row"><span class="visit-label">Visit 2 (6 mo)</span><span>Still elevated → reinforce lifestyle, review BMI/sleep/family hx. No labs yet unless red flags.</span></div>
+        <div class="visit-row"><span class="visit-label">Visit 3 (12 mo)</span><span>Persistent → obtain ABPM. If confirmed, reclassify as Stage 1. If normal → resume annual screening.</span></div>
+      </div>
+      <div class="stage-block stage1">
+        <div class="stage-label">🟠 Stage 1 HTN (95th to 95th+12 mmHg or 130–139/80–89)</div>
+        <div class="visit-row"><span class="visit-label">Visit 1</span><span>Confirm manually, average 2 readings. Lifestyle counseling. Recheck in 1–2 weeks.</span></div>
+        <div class="visit-row"><span class="visit-label">Visit 2</span><span>Still Stage 1 → check BPs in both arms + 1 leg (r/o coarctation). Review meds, diet, sleep, FHx. Recheck in 3 months.</span></div>
+        <div class="visit-row"><span class="visit-label">Persistent (3 visits)</span><span>ABPM + workup: UA, BUN/Cr, electrolytes, lipids ± renal US, echo for LVH. Continue lifestyle ×6 mo; start meds if persistent or LVH/CKD/DM.</span></div>
+      </div>
+      <div class="stage-block stage2">
+        <div class="stage-label">🔴 Stage 2 HTN (≥95th+12 mmHg or ≥140/90)</div>
+        <div class="visit-row"><span class="visit-label">Immediate</span><span>Confirm manually. Measure both arms + 1 leg. Assess for symptoms (HA, vision, chest pain, neuro).</span></div>
+        <div class="visit-row"><span class="visit-label">Urgent referral if</span><span>Symptomatic OR ≥30 mmHg above 95th %ile → same-day ED/urgent eval.</span></div>
+        <div class="visit-row"><span class="visit-label">Confirmed persistent</span><span>Start pharmacotherapy promptly — do not delay for lifestyle trial. ABPM + UA, BUN/Cr, lipids, renal US, echo. Follow-up q2–4 wk until controlled → q3–6 mo. Refer nephrology/cardiology as needed.</span></div>
+      </div>
+    </div>
+
+    <div class="mgmt-section">
+      <div class="mgmt-title">Pharmacologic therapy</div>
+      <div class="highlight-box" style="margin-bottom:12px">
+        <strong>Indications:</strong> Stage 2 HTN · Symptomatic HTN · End-organ damage (LVH, CKD) · Persistent Stage 1 after 6 mo lifestyle trial · CKD or DM
+      </div>
+      <table class="drug-table">
+        <tr><th>Class</th><th>Examples</th><th>Notes</th></tr>
+        <tr><td><span class="drug-name">ACE inhibitors</span></td><td>Lisinopril, Enalapril</td><td>First-line; preferred with proteinuric CKD. Avoid in pregnancy.</td></tr>
+        <tr><td><span class="drug-name">ARBs</span></td><td>Losartan</td><td>Same indication as ACE-I, no cough side effect.</td></tr>
+        <tr><td><span class="drug-name">CCBs</span></td><td>Amlodipine</td><td>Well tolerated, good first-line option.</td></tr>
+        <tr><td><span class="drug-name">Thiazide diuretics</span></td><td>HCTZ</td><td>Useful if volume overload component.</td></tr>
+        <tr><td><span class="drug-name">Beta-blockers</span></td><td>Atenolol</td><td>Less first-line unless specific indication.</td></tr>
+      </table>
+      <p style="font-size:12px;color:var(--text3);margin-top:8px">BP target: &lt;90th %ile (&lt;130/80 if ≥13 yr)</p>
+    </div>
+
+    <div class="mgmt-section">
+      <div class="mgmt-title">Lifestyle — first-line at all stages</div>
+      <ul class="pearl-list">
+        <li><span class="pearl-dot">→</span><span>DASH-type diet + sodium restriction</span></li>
+        <li><span class="pearl-dot">→</span><span>30–60 min moderate-to-vigorous activity daily</span></li>
+        <li><span class="pearl-dot">→</span><span>Weight management (5–10% loss often normalizes BP in overweight children)</span></li>
+        <li><span class="pearl-dot">→</span><span>Limit screen time, avoid energy drinks and caffeine</span></li>
+      </ul>
+    </div>
+
+    <div class="mgmt-section">
+      <div class="mgmt-title">Workup — when to order</div>
+      <ul class="pearl-list">
+        <li><span class="pearl-dot">→</span><span><strong>Both arms + 1 leg BP</strong> once HTN suspected (rule out coarctation)</span></li>
+        <li><span class="pearl-dot">→</span><span><strong>ABPM</strong> — gold standard to confirm; differentiates white-coat vs masked vs sustained HTN</span></li>
+        <li><span class="pearl-dot">→</span><span><strong>Labs:</strong> UA, BUN/Cr, electrolytes, lipid panel ± fasting glucose</span></li>
+        <li><span class="pearl-dot">→</span><span><strong>Renal US:</strong> children &lt;6 yr or abnormal UA/Cr</span></li>
+        <li><span class="pearl-dot">→</span><span><strong>Echocardiogram:</strong> assess for LVH — if present, treat regardless of stage</span></li>
+      </ul>
+    </div>
+
+    <div class="mgmt-section">
+      <div class="mgmt-title">Common causes by age</div>
+      <table class="cause-table">
+        <tr><td>Infants</td><td>Renal artery stenosis, coarctation of aorta, congenital renal disease</td></tr>
+        <tr><td>Children</td><td>Renal parenchymal disease (most common overall), renovascular HTN</td></tr>
+        <tr><td>Adolescents</td><td>Primary (essential) HTN becomes increasingly common; secondary still possible</td></tr>
+      </table>
+      <p style="font-size:12px;color:var(--text3);margin-top:8px">Children &lt;6 yr with HTN should be evaluated for secondary causes.</p>
+    </div>
+
+    <div class="mgmt-section" style="margin-bottom:0">
+      <div class="mgmt-title">Clinical pearls</div>
+      <ul class="pearl-list">
+        <li><span class="pearl-dot">→</span><span>Most elevated BP in children is transient (stress, anxiety, improper cuff, white-coat effect)</span></li>
+        <li><span class="pearl-dot">→</span><span>Confirm diagnosis across ≥3 separate visits before labeling Stage 1 HTN</span></li>
+        <li><span class="pearl-dot">→</span><span>Tall children have higher "normal" BP ranges — always use height-based percentiles</span></li>
+        <li><span class="pearl-dot">→</span><span>LVH on echo = treat regardless of BP stage</span></li>
+        <li><span class="pearl-dot">→</span><span>Diastolic HTN and nocturnal HTN on ABPM → more likely secondary cause</span></li>
+        <li><span class="pearl-dot">→</span><span>Prepubertal child with HTN → secondary cause more likely; postpubertal → primary more likely</span></li>
+        <li><span class="pearl-dot">→</span><span>Avoid over-testing early unless red flags: symptoms, very high BP, abnormal exam</span></li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<!-- Measurement Technique Accordion -->
+<div class="accordion">
+  <button class="acc-header" onclick="toggleAcc('measBody','measIcon')">
+    <span>BP measurement technique</span>
+    <span class="acc-icon" id="measIcon">▼</span>
+  </button>
+  <div class="acc-body" id="measBody">
+    <ul class="pearl-list" style="margin-bottom:12px">
+      <li><span class="pearl-dot">→</span><span>Child seated ≥5 min, back supported, feet flat, right arm at heart level</span></li>
+      <li><span class="pearl-dot">→</span><span>Cuff width = 40% of arm circumference; bladder length = 80–100% of arm circumference</span></li>
+      <li><span class="pearl-dot">→</span><span>Oscillometric device acceptable for screening; confirm any elevated reading with auscultatory method</span></li>
+      <li><span class="pearl-dot">→</span><span>Take 2 readings, average them. Repeat on a separate visit before diagnosing HTN</span></li>
+    </ul>
+    <div class="mgmt-title">Cuff size guide</div>
+    <table class="cause-table">
+      <tr><td style="width:120px">&lt;22 cm</td><td>Child or small adult cuff (9×18 cm)</td></tr>
+      <tr><td>22–26 cm</td><td>Small adult cuff</td></tr>
+      <tr><td>27–34 cm</td><td>Standard adult cuff</td></tr>
+      <tr><td>35–44 cm</td><td>Large adult cuff</td></tr>
+      <tr><td>&gt;44 cm</td><td>Adult thigh cuff</td></tr>
+    </table>
+  </div>
+</div>
+
+<div class="card" style="margin-top:0">
+  <p style="font-size:12px;color:var(--text3);line-height:1.6">Source: 2017 AAP Clinical Practice Guideline (Pediatrics Vol. 140, e20171904). Thresholds displayed use the 50th height percentile column. Confirm diagnosis across ≥3 occasions. Not a substitute for clinical judgment.</p>
+</div>
+
+<script>
+const DATA={
+  F:{1:{sbp:[84,98,101,113],dbp:[41,54,59,71]},2:{sbp:[87,101,104,116],dbp:[45,58,62,74]},3:{sbp:[88,102,106,118],dbp:[48,60,64,76]},4:{sbp:[89,103,107,119],dbp:[50,62,66,78]},5:{sbp:[90,104,108,120],dbp:[52,64,68,80]},6:{sbp:[91,105,109,121],dbp:[54,67,70,82]},7:{sbp:[92,106,109,121],dbp:[55,68,72,84]},8:{sbp:[93,107,110,122],dbp:[56,69,72,84]},9:{sbp:[95,108,112,124],dbp:[57,71,74,86]},10:{sbp:[96,109,113,125],dbp:[58,72,75,87]},11:{sbp:[98,111,115,127],dbp:[60,74,76,88]},12:{sbp:[102,114,118,130],dbp:[61,75,78,90]},13:{sbp:[104,116,121,133],dbp:[62,75,79,91]},14:{sbp:[105,118,123,135],dbp:[63,76,80,92]},15:{sbp:[105,118,124,136],dbp:[64,76,80,92]},16:{sbp:[106,119,124,136],dbp:[64,76,80,92]},17:{sbp:[107,120,125,137],dbp:[64,76,80,92]}},
+  M:{1:{sbp:[85,98,102,114],dbp:[40,52,54,66]},2:{sbp:[87,100,104,116],dbp:[43,55,57,69]},3:{sbp:[88,101,106,118],dbp:[45,58,60,72]},4:{sbp:[90,102,107,119],dbp:[48,60,63,75]},5:{sbp:[91,103,107,119],dbp:[51,63,66,78]},6:{sbp:[93,105,108,120],dbp:[54,66,69,81]},7:{sbp:[94,106,110,122],dbp:[56,68,71,83]},8:{sbp:[95,107,111,123],dbp:[57,69,72,84]},9:{sbp:[96,107,112,124],dbp:[57,70,74,86]},10:{sbp:[97,108,112,124],dbp:[59,72,76,88]},11:{sbp:[99,110,114,126],dbp:[61,74,77,89]},12:{sbp:[101,113,116,128],dbp:[61,75,78,90]},13:{sbp:[103,115,119,131],dbp:[61,74,78,90]},14:{sbp:[105,119,123,135],dbp:[60,74,77,89]},15:{sbp:[108,123,127,139],dbp:[61,75,78,90]},16:{sbp:[111,126,130,142],dbp:[63,77,80,92]},17:{sbp:[114,128,132,144],dbp:[65,78,81,93]}}
+};
+
+const CATS=['Normal','Elevated BP','Stage 1 HTN','Stage 2 HTN'];
+const COLORS=[
+  {bg:'var(--success-bg)',text:'var(--success)',border:'var(--success-b)'},
+  {bg:'var(--warning-bg)',text:'var(--warning)',border:'var(--warning-b)'},
+  {bg:'var(--danger-bg)',text:'var(--danger)',border:'var(--danger-b)'},
+  {bg:'var(--stage2-bg)',text:'var(--stage2)',border:'var(--stage2-b)'}
+];
+const NOTES=[
+  'Routine monitoring. Recheck at next well visit.',
+  'Recheck in 6 months. Lifestyle counseling (diet, exercise, weight, sodium). No pharmacotherapy at this stage.',
+  'Recheck in 1–2 weeks. If confirmed × 3 visits: dietary modification, weight management, ABPM, consider secondary workup. Pharmacotherapy if symptomatic or persistent after 6 months of lifestyle changes.',
+  'Recheck within 1 week or sooner if symptomatic. If ≥30 mmHg above 95th %ile → same-day referral. Prompt secondary evaluation. Start pharmacotherapy after confirmation — do not delay.'
+];
+
+function toggleTheme(){
+  const el=document.documentElement;
+  const dark=el.hasAttribute('data-dark');
+  dark?el.removeAttribute('data-dark'):el.setAttribute('data-dark','');
+  document.getElementById('themeBtn').textContent=dark?'☀':'🌙';
+}
+
+function toggleAcc(bodyId,iconId){
+  const b=document.getElementById(bodyId);
+  const i=document.getElementById(iconId);
+  const open=b.classList.contains('open');
+  b.classList.toggle('open',!open);
+  i.classList.toggle('open',!open);
+}
+
+function catIdx(v,p90,p95,p95p12){
+  if(v>=p95p12)return 3;
+  if(v>=p95)return 2;
+  if(v>=p90)return 1;
+  return 0;
+}
+
+function classify(){
+  const sex=document.getElementById('sex').value;
+  const age=parseInt(document.getElementById('age').value);
+  const sbp=parseInt(document.getElementById('sbp').value);
+  const dbp=parseInt(document.getElementById('dbp').value);
+  const out=document.getElementById('output');
+
+  if(!sex||!age||!sbp||!dbp){alert('Please fill in all fields.');return;}
+  if(age<1||age>17){alert('Age must be 1–17.');return;}
+
+  out.style.display='block';
+
+  if(age>=13){
+    let si,note;
+    if(sbp<120&&dbp<80){si=0;}
+    else if(sbp>=140||dbp>=90){si=3;}
+    else if(sbp>=130||dbp>=80){si=2;}
+    else{si=1;}
+    const c=COLORS[si];
+    out.innerHTML=`
+      <div class="result-card" style="background:${c.bg};border-color:${c.border}">
+        <span class="badge" style="background:${c.bg};color:${c.text};border:0.5px solid ${c.border}">Age ≥13 — adult thresholds</span>
+        <div class="big-label" style="color:${c.text}">${CATS[si]}</div>
+        <div style="font-size:17px;font-weight:500;margin:2px 0 8px;color:${c.text}">${sbp}/${dbp} mmHg</div>
+        <div class="sub">${NOTES[si]}</div>
+      </div>
+      <div class="card">
+        <p style="font-size:13px;font-weight:500;color:var(--text2);margin-bottom:10px">Adult thresholds (≥13 years)</p>
+        <div class="thresh-row"><span class="t-label">Normal</span><span>&lt;120 / &lt;80</span></div>
+        <div class="thresh-row"><span class="t-label">Elevated BP</span><span>120–129 / &lt;80</span></div>
+        <div class="thresh-row"><span class="t-label">Stage 1 HTN</span><span>130–139 / 80–89</span></div>
+        <div class="thresh-row"><span class="t-label">Stage 2 HTN</span><span>≥140 / ≥90</span></div>
+      </div>`;
+    return;
+  }
+
+  const htpct=document.getElementById('htpct').value;
+  if(!htpct){alert('Height percentile required for age <13.');return;}
+
+  const d=DATA[sex][age];
+  const [p90s,p95s,p95p12s]=[d.sbp[1],d.sbp[2],d.sbp[3]];
+  const [p90d,p95d,p95p12d]=[d.dbp[1],d.dbp[2],d.dbp[3]];
+
+  const si=catIdx(sbp,p90s,p95s,p95p12s);
+  const di=catIdx(dbp,p90d,p95d,p95p12d);
+  const fi=Math.max(si,di);
+  const c=COLORS[fi];
+
+  out.innerHTML=`
+    <div class="result-card" style="background:${c.bg};border-color:${c.border}">
+      <span class="badge" style="background:${c.bg};color:${c.text};border:0.5px solid ${c.border}">${sex==='M'?'Male':'Female'} · Age ${age} · ${htpct}th ht %ile</span>
+      <div class="big-label" style="color:${c.text}">${CATS[fi]}</div>
+      <div style="font-size:17px;font-weight:500;margin:2px 0 8px;color:${c.text}">${sbp}/${dbp} mmHg</div>
+      <div class="sub">${NOTES[fi]}</div>
+    </div>
+    <div class="card">
+      <p style="font-size:13px;font-weight:500;color:var(--text2);margin-bottom:10px">Breakdown</p>
+      <div class="info-row"><span style="color:var(--text2)">Systolic</span><span class="info-val" style="color:${COLORS[si].text}">${sbp} mmHg — ${CATS[si]}</span></div>
+      <div class="info-row"><span style="color:var(--text2)">Diastolic</span><span class="info-val" style="color:${COLORS[di].text}">${dbp} mmHg — ${CATS[di]}</span></div>
+      <div class="info-row"><span style="color:var(--text2)">Overall</span><span class="info-val" style="color:${c.text}">${CATS[fi]}</span></div>
+    </div>
+    <div class="card">
+      <p style="font-size:13px;font-weight:500;color:var(--text2);margin-bottom:10px">Thresholds (50th ht %ile · ${sex==='M'?'Male':'Female'} · age ${age})</p>
+      <div class="thresh-row"><span class="t-label">Normal (&lt;90th %ile)</span><span>&lt;${p90s} / &lt;${p90d}</span></div>
+      <div class="thresh-row"><span class="t-label">Elevated (90th–&lt;95th)</span><span>${p90s}–${p95s-1} / ${p90d}–${p95d-1}</span></div>
+      <div class="thresh-row"><span class="t-label">Stage 1 (95th to 95th+12)</span><span>${p95s}–${p95p12s-1} / ${p95d}–${p95p12d-1}</span></div>
+      <div class="thresh-row"><span class="t-label">Stage 2 (≥95th+12)</span><span>≥${p95p12s} / ≥${p95p12d}</span></div>
+    </div>`;
+}
+</script>
