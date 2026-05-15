@@ -20,6 +20,14 @@ const ARTIFACTS = [
     path: "/artifacts/bp-calculator.html",
     tags: ["pediatrics", "clinical"],
   },
+  {
+    id: "dyslexia-screen",
+    name: "Bedside Dyslexia Screen",
+    description: "Phonological bedside screening tool by age group. Quick in-office dyslexia risk assessment for pediatric patients.",
+    type: "html",
+    path: "/artifacts/dyslexia-bedside-screen.html",
+    tags: ["pediatrics", "clinical", "screening"],
+  },
 ];
 
 function Gallery() {

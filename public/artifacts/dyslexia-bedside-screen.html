@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bedside Dyslexia Screening Tool</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a1a2e;
+    --paper: #faf8f4;
+    --cream: #f2ede4;
+    --accent: #c0392b;
+    --accent-light: #f9ebe9;
+    --muted: #7a7068;
+    --border: #d8d0c4;
+    --green: #2d6a4f;
+    --green-light: #e9f5ee;
+    --blue: #1a4e8a;
+    --blue-light: #e8f0fb;
+    --orange: #b5451b;
+    --orange-light: #fdf0ea;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+
+  /* ── SCREEN UI ── */
+  .screen-ui {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+  }
+
+  .header {
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  .header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.8rem;
+    line-height: 1.1;
+  }
+
+  .header-sub {
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 500;
+  }
+
+  .print-btn {
+    background: var(--ink);
+    color: white;
+    border: none;
+    padding: 0.5rem 1.2rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    transition: background 0.15s;
+  }
+  .print-btn:hover { background: var(--accent); }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid var(--border);
+  }
+
+  .tab {
+    padding: 0.6rem 1.4rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    background: none;
+    color: var(--muted);
+    font-family: 'DM Sans', sans-serif;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.15s;
+  }
+  .tab:hover { color: var(--ink); }
+  .tab.active {
+    color: var(--ink);
+    border-bottom-color: var(--accent);
+    font-weight: 600;
+  }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Age cards */
+  .age-section {
+    margin-bottom: 2rem;
+    border: 1.5px solid var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .age-header {
+    padding: 0.75rem 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .age-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 500;
+    padding: 0.25rem 0.6rem;
+    border-radius: 1px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+
+  .age-k  { background: var(--green-light); color: var(--green); border: 1px solid #b7ddc8; }
+  .age-ee { background: var(--blue-light); color: var(--blue); border: 1px solid #c0d4f0; }
+  .age-le { background: var(--orange-light); color: var(--orange); border: 1px solid #f0c9b5; }
+
+  .age-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem;
+  }
+
+  .age-subtitle { font-size: 0.78rem; color: var(--muted); margin-left: auto; }
+
+  .chevron {
+    margin-left: auto;
+    font-size: 0.8rem;
+    color: var(--muted);
+    transition: transform 0.2s;
+  }
+  .age-section.open .chevron { transform: rotate(180deg); }
+  .age-section:not(.open) .age-subtitle { display: block; }
+  .age-section.open .age-subtitle { display: none; }
+
+  .age-body {
+    display: none;
+    padding: 1.2rem 1.4rem;
+    border-top: 1px solid var(--border);
+    background: white;
+  }
+  .age-section.open .age-body { display: block; }
+
+  /* Task blocks */
+  .task {
+    margin-bottom: 1.5rem;
+  }
+  .task:last-child { margin-bottom: 0; }
+
+  .task-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 0.4rem;
+  }
+
+  .task-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-bottom: 0.6rem;
+    color: var(--ink);
+  }
+
+  /* Word display */
+  .word-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0.6rem 0;
+  }
+
+  .word-card {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.4rem;
+    font-weight: 500;
+    padding: 0.4rem 0.9rem;
+    background: var(--cream);
+    border: 1.5px solid var(--border);
+    letter-spacing: 0.05em;
+    color: var(--ink);
+  }
+
+  .word-card.large { font-size: 2rem; padding: 0.5rem 1.2rem; }
+
+  /* Script blocks */
+  .script {
+    background: var(--cream);
+    border-left: 3px solid var(--accent);
+    padding: 0.7rem 1rem;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    margin: 0.5rem 0;
+    font-style: italic;
+    color: #3a3030;
+  }
+
+  .script strong {
+    font-style: normal;
+    font-weight: 600;
+    color: var(--accent);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: block;
+    margin-bottom: 0.2rem;
+  }
+
+  .expected {
+    font-size: 0.78rem;
+    color: var(--green);
+    font-weight: 500;
+    margin-top: 0.3rem;
+    font-style: normal;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+  .expected::before { content: "✓"; }
+
+  .flag {
+    font-size: 0.78rem;
+    color: var(--accent);
+    font-weight: 500;
+    margin-top: 0.2rem;
+    font-style: normal;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+  .flag::before { content: "⚑"; }
+
+  .note {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px dashed var(--border);
+    line-height: 1.5;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px dashed var(--border);
+    margin: 1.2rem 0;
+  }
+
+  /* Scoring footer */
+  .scoring {
+    background: var(--ink);
+    color: white;
+    padding: 1rem 1.4rem;
+    margin-top: 2rem;
+    font-size: 0.82rem;
+    line-height: 1.7;
+  }
+  .scoring h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    font-weight: 400;
+  }
+  .scoring-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+    margin-top: 0.8rem;
+  }
+  .scoring-item {
+    border-left: 2px solid rgba(255,255,255,0.3);
+    padding-left: 0.8rem;
+  }
+  .scoring-item strong { display: block; color: #f0c8c4; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.2rem; }
+
+  /* ══════════════════════════════
+     PRINT STYLES
+  ══════════════════════════════ */
+  @media print {
+    .screen-ui > .header .print-btn,
+    .tabs,
+    .chevron,
+    .age-subtitle { display: none !important; }
+
+    .tab-content { display: block !important; }
+    .age-body { display: block !important; }
+    .age-section { break-inside: avoid; margin-bottom: 1.5rem; }
+
+    /* Clinician script: small, muted */
+    .view-clinician .script {
+      font-size: 0.72rem;
+      background: #f8f8f8;
+      border-left-color: #aaa;
+      color: #555;
+    }
+
+    /* Patient card: big and clean */
+    .view-patient .word-card { font-size: 2.2rem; }
+    .view-patient .script { display: none; }
+    .view-patient .note { display: none; }
+    .view-patient .scoring { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="screen-ui">
+
+  <div class="header">
+    <div>
+      <p class="header-sub">Outpatient Pediatrics · Clinical Screen</p>
+      <h1>Bedside Dyslexia<br>Screening Tool</h1>
+    </div>
+    <button class="print-btn" onclick="window.print()">⎙ Print</button>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('clinician')">Clinician Script</button>
+    <button class="tab" onclick="switchTab('patient')">Patient Card</button>
+  </div>
+
+  <!-- ═══════════════════ CLINICIAN VIEW ═══════════════════ -->
+  <div class="tab-content view-clinician active" id="tab-clinician">
+
+    <!-- AGE: 5–6 -->
+    <div class="age-section open" id="age-k">
+      <div class="age-header" onclick="toggleAge('age-k')">
+        <span class="age-badge age-k">5–6 yrs</span>
+        <span class="age-title">Kindergarten</span>
+        <span class="age-subtitle">Phoneme awareness · Letter sounds</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="age-body">
+
+        <div class="task">
+          <div class="task-label">Task 1</div>
+          <div class="task-title">Letter Sound Knowledge</div>
+          <div class="script"><strong>Say to child</strong>"I'm going to show you some letters. Tell me what sound each one makes — not the name, the sound. Ready?"<br><br>Point to each letter one at a time: <strong>S · M · T · F · B</strong></div>
+          <div class="word-grid">
+            <span class="word-card large">S</span>
+            <span class="word-card large">M</span>
+            <span class="word-card large">T</span>
+            <span class="word-card large">F</span>
+            <span class="word-card large">B</span>
+          </div>
+          <p class="expected">By end of kindergarten: 4–5/5 correct</p>
+          <p class="flag">Concern: ≤2/5, or gives letter names instead of sounds consistently</p>
+        </div>
+
+        <hr class="divider">
+
+        <div class="task">
+          <div class="task-label">Task 2</div>
+          <div class="task-title">Phoneme Segmentation (Spoken Words)</div>
+          <div class="script"><strong>Say to child</strong>"I'm going to say a word, and I want you to tap once for every sound you hear. Like this — 'sun' has three sounds: /s/ /u/ /n/. Now you try."<br><br>Words to use: <strong>cat · up · fish · hop · bell</strong></div>
+          <p class="expected">Expected: 3–4 taps correct on 3+ words</p>
+          <p class="flag">Concern: Taps syllables instead of phonemes, or can only do 1-sound words</p>
+          <p class="note">This age: segmentation of 2–3 phoneme words is the benchmark. Don't use blends (st-, bl-) at this age.</p>
+        </div>
+
+        <hr class="divider">
+
+        <div class="task">
+          <div class="task-label">Task 3</div>
+          <div class="task-title">Rhyme Recognition</div>
+          <div class="script"><strong>Say to child</strong>"Do these words rhyme? Cat — bat." (pause) "Dog — log." (pause) "Sun — cup."<br><br>Expected: Correctly identifies first two as rhymes, third as non-rhyme.</div>
+          <p class="expected">Expected: 2/3 correct minimum</p>
+          <p class="flag">Concern: Cannot identify any rhyme pairs; confuses rhyme with same first sound</p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- AGE: 6–8 -->
+    <div class="age-section open" id="age-ee">
+      <div class="age-header" onclick="toggleAge('age-ee')">
+        <span class="age-badge age-ee">6–8 yrs</span>
+        <span class="age-title">Early Elementary</span>
+        <span class="age-subtitle">Decoding · Nonsense words · RAN</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="age-body">
+
+        <div class="task">
+          <div class="task-label">Task 1 · Core Test</div>
+          <div class="task-title">Nonsense Word Reading</div>
+          <div class="script"><strong>Say to child</strong>"These are made-up words — they're not real, so you've never seen them before. Sound them out the best you can."</div>
+          <div class="word-grid">
+            <span class="word-card">bim</span>
+            <span class="word-card">frop</span>
+            <span class="word-card">stavel</span>
+            <span class="word-card">nust</span>
+            <span class="word-card">cheld</span>
+            <span class="word-card">widge</span>
+          </div>
+          <p class="expected">Expected (1st–2nd grade): 4–5/6 decoded correctly or with close approximation</p>
+          <p class="flag">Concern: Guesses real words ("frog" for "frop"), refuses, or produces phonologically distant responses</p>
+          <p class="note">This is your highest-yield single item. No whole-word memory to fall back on — pure phonological decoding.</p>
+        </div>
+
+        <hr class="divider">
+
+        <div class="task">
+          <div class="task-label">Task 2</div>
+          <div class="task-title">Phoneme Segmentation — Harder</div>
+          <div class="script"><strong>Say to child</strong>"Tell me every sound you hear in each word. Go slowly."<br><br>Words: <strong>ship · flat · blast · chin</strong></div>
+          <p class="expected">ship → /sh/ /i/ /p/ &nbsp;|&nbsp; flat → /f/ /l/ /a/ /t/ &nbsp;|&nbsp; blast → /b/ /l/ /a/ /s/ /t/</p>
+          <p class="flag">Concern: Merges blends (says "fl" as one sound), misses final consonants, collapses clusters</p>
+        </div>
+
+        <hr class="divider">
+
+        <div class="task">
+          <div class="task-label">Task 3</div>
+          <div class="task-title">Rapid Automatized Naming (Informal)</div>
+          <div class="script"><strong>Say to child</strong>"Name these as fast as you can without stopping." Point across the row quickly.</div>
+          <div class="word-grid" style="font-size:1.6rem; gap:0.8rem;">
+            <span class="word-card large">2</span>
+            <span class="word-card large">7</span>
+            <span class="word-card large">4</span>
+            <span class="word-card large">9</span>
+            <span class="word-card large">1</span>
+            <span class="word-card large">5</span>
+            <span class="word-card large">3</span>
+            <span class="word-card large">8</span>
+          </div>
+          <p class="expected">Expected: Smooth, fast, minimal hesitation</p>
+          <p class="flag">Concern: Slow, hesitant, skips, self-corrects frequently — especially combined with poor nonsense word reading (double-deficit pattern)</p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- AGE: 8–11 -->
+    <div class="age-section open" id="age-le">
+      <div class="age-header" onclick="toggleAge('age-le')">
+        <span class="age-badge age-le">8–11 yrs</span>
+        <span class="age-title">Late Elementary</span>
+        <span class="age-subtitle">Irregular words · Spoonerisms · Fluency</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="age-body">
+
+        <div class="task">
+          <div class="task-label">Task 1</div>
+          <div class="task-title">Irregular Word Reading (Surface Dyslexia Probe)</div>
+          <div class="script"><strong>Say to child</strong>"Read each word aloud. Take your time."</div>
+          <div class="word-grid">
+            <span class="word-card">yacht</span>
+            <span class="word-card">sword</span>
+            <span class="word-card">colonel</span>
+            <span class="word-card">island</span>
+            <span class="word-card">receipt</span>
+          </div>
+          <p class="expected">Expected: Recognizes whole-word forms, doesn't over-regularize</p>
+          <p class="flag">Surface pattern: "yatched," "col-o-nel," "re-CEIPT" — phonics applied where it fails</p>
+          <p class="note">Phonological dyslexics often do better here (they've memorized common words). Surface dyslexics fail these specifically.</p>
+        </div>
+
+        <hr class="divider">
+
+        <div class="task">
+          <div class="task-label">Task 2 · Highest Demand</div>
+          <div class="task-title">Spoonerisms</div>
+          <div class="script"><strong>Say to child</strong>"This is a word game. I'll say two words and you swap the first sounds. Like: 'top hat' becomes 'hop tat.' Ready?"<br><br>
+          Pairs: <strong>cat / dog &nbsp;→&nbsp; dat/cog</strong><br>
+          <strong>big / sun &nbsp;→&nbsp; sig/bun</strong><br>
+          <strong>fish / map &nbsp;→&nbsp; mish/fap</strong></div>
+          <p class="expected">Expected (age 8+): 2–3/3 correct with some processing time</p>
+          <p class="flag">Concern: Cannot do any correctly; substitutes semantically related words; freezes</p>
+          <p class="note">This is the most cognitively demanding phonological manipulation task. Strong ceiling effect — kids who succeed here almost certainly don't have phonological dyslexia.</p>
+        </div>
+
+        <hr class="divider">
+
+        <div class="task">
+          <div class="task-label">Task 3</div>
+          <div class="task-title">Advanced Nonsense Words</div>
+          <div class="script"><strong>Say to child</strong>"Made-up words again — sound them out."</div>
+          <div class="word-grid">
+            <span class="word-card">phlomit</span>
+            <span class="word-card">scrandel</span>
+            <span class="word-card">quivest</span>
+            <span class="word-card">throstip</span>
+          </div>
+          <p class="expected">Expected: Phonologically close decoding, handles consonant clusters and digraphs</p>
+          <p class="flag">Concern: Still guessing real words, omits syllables, cannot handle multi-syllable nonsense words</p>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Scoring / referral -->
+    <div class="scoring">
+      <h3>Clinical Decision Guide</h3>
+      <div class="scoring-grid">
+        <div class="scoring-item">
+          <strong>Refer for Full Eval</strong>
+          Fails nonsense words + phoneme segmentation at age level. Any double-deficit pattern (poor RAN + poor decoding). Parent/teacher concern + 1 failed task.
+        </div>
+        <div class="scoring-item">
+          <strong>Monitor Closely</strong>
+          Borderline performance on 1 task. Strong family history. Reading avoidance despite adequate instruction. Oral language clearly outpaces written.
+        </div>
+        <div class="scoring-item">
+          <strong>Reassure + Recheck</strong>
+          Age-appropriate on all tasks. Concern appears to be pacing or attention rather than phonological deficit. Recheck in 6 months if worry persists.
+        </div>
+      </div>
+      <p style="margin-top:1rem; font-size:0.72rem; color:#c8c0bc;">This is a clinical screen, not a diagnostic instrument. Formal diagnosis requires psychoeducational evaluation (CTOPP-2, TOWRE-2, WRMT-III). Refer to neuropsychology or developmental pediatrics for confirmed concerns.</p>
+    </div>
+
+  </div><!-- /clinician -->
+
+
+  <!-- ═══════════════════ PATIENT CARD VIEW ═══════════════════ -->
+  <div class="tab-content view-patient" id="tab-patient">
+
+    <div class="age-section open" id="pt-age-k">
+      <div class="age-header" onclick="toggleAge('pt-age-k')">
+        <span class="age-badge age-k">5–6 yrs</span>
+        <span class="age-title">Kindergarten</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="age-body">
+        <div class="task">
+          <div class="task-label">Letter Sounds</div>
+          <div class="word-grid">
+            <span class="word-card large">S</span>
+            <span class="word-card large">M</span>
+            <span class="word-card large">T</span>
+            <span class="word-card large">F</span>
+            <span class="word-card large">B</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="age-section open" id="pt-age-ee">
+      <div class="age-header" onclick="toggleAge('pt-age-ee')">
+        <span class="age-badge age-ee">6–8 yrs</span>
+        <span class="age-title">Early Elementary</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="age-body">
+        <div class="task">
+          <div class="task-label">Nonsense Words — Read Aloud</div>
+          <div class="word-grid">
+            <span class="word-card large">bim</span>
+            <span class="word-card large">frop</span>
+            <span class="word-card large">stavel</span>
+            <span class="word-card large">nust</span>
+            <span class="word-card large">cheld</span>
+            <span class="word-card large">widge</span>
+          </div>
+        </div>
+        <hr class="divider">
+        <div class="task">
+          <div class="task-label">Numbers — Name as Fast as You Can</div>
+          <div class="word-grid">
+            <span class="word-card large">2</span>
+            <span class="word-card large">7</span>
+            <span class="word-card large">4</span>
+            <span class="word-card large">9</span>
+            <span class="word-card large">1</span>
+            <span class="word-card large">5</span>
+            <span class="word-card large">3</span>
+            <span class="word-card large">8</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="age-section open" id="pt-age-le">
+      <div class="age-header" onclick="toggleAge('pt-age-le')">
+        <span class="age-badge age-le">8–11 yrs</span>
+        <span class="age-title">Late Elementary</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="age-body">
+        <div class="task">
+          <div class="task-label">Read These Words</div>
+          <div class="word-grid">
+            <span class="word-card large">yacht</span>
+            <span class="word-card large">sword</span>
+            <span class="word-card large">colonel</span>
+            <span class="word-card large">island</span>
+            <span class="word-card large">receipt</span>
+          </div>
+        </div>
+        <hr class="divider">
+        <div class="task">
+          <div class="task-label">Made-Up Words — Sound Them Out</div>
+          <div class="word-grid">
+            <span class="word-card large">phlomit</span>
+            <span class="word-card large">scrandel</span>
+            <span class="word-card large">quivest</span>
+            <span class="word-card large">throstip</span>
+          </div>
+        </div>
+        <hr class="divider">
+        <div class="task">
+          <div class="task-label">Word Game — Swap the First Sounds</div>
+          <div style="background:var(--cream); border:1.5px solid var(--border); padding:1rem 1.2rem; margin-top:0.6rem; line-height:2;">
+            <div style="font-family:'DM Mono',monospace; font-size:1.1rem; margin-bottom:0.6rem;">
+              <span style="font-weight:600;">Example:</span> &nbsp;"top hat" → "hop tat"
+            </div>
+            <div style="font-family:'DM Mono',monospace; font-size:1.15rem; display:flex; flex-direction:column; gap:0.5rem;">
+              <div><span style="background:white; border:1px solid var(--border); padding:0.2rem 0.6rem;">cat</span> &nbsp;+&nbsp; <span style="background:white; border:1px solid var(--border); padding:0.2rem 0.6rem;">dog</span> &nbsp;→ &nbsp;?</div>
+              <div><span style="background:white; border:1px solid var(--border); padding:0.2rem 0.6rem;">big</span> &nbsp;+&nbsp; <span style="background:white; border:1px solid var(--border); padding:0.2rem 0.6rem;">sun</span> &nbsp;→ &nbsp;?</div>
+              <div><span style="background:white; border:1px solid var(--border); padding:0.2rem 0.6rem;">fish</span> &nbsp;+&nbsp; <span style="background:white; border:1px solid var(--border); padding:0.2rem 0.6rem;">map</span> &nbsp;→ &nbsp;?</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /patient -->
+
+</div><!-- /screen-ui -->
+
+<script>
+  function switchTab(name) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+    document.getElementById('tab-' + name).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+  function toggleAge(id) {
+    const el = document.getElementById(id);
+    el.classList.toggle('open');
+  }
+</script>
+</body>
+</html>
