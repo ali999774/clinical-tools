@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Link, useLocation } from "react-router-dom";
 import EMCalculator from "./artifacts/EMCalculator";
 
 // ── Artifact Manifest ──────────────────────────────
@@ -104,10 +104,49 @@ function Gallery() {
   );
 }
 
+function Layout() {
+  const location = useLocation();
+  const isHome = location.pathname === "/";
+  const current = ARTIFACTS.find(a => a.path === location.pathname);
+  return (
+    <>
+      {!isHome && (
+        <header style={{
+          borderBottom: "1px solid #e5e7eb",
+          background: "#fff",
+          padding: "12px 20px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          position: "sticky",
+          top: 0,
+          zIndex: 10,
+        }}>
+          <Link to="/" style={{
+            color: "#4f46e5",
+            textDecoration: "none",
+            fontWeight: 500,
+            fontSize: 14,
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+          }}>
+            <span style={{ fontSize: 16 }}>←</span> Clinical Tools
+          </Link>
+          {current && (
+            <span style={{ fontSize: 13, color: "#9ca3af" }}>{current.name}</span>
+          )}
+        </header>
+      )}
+    </>
+  );
+}
+
 function App() {
   return (
     <BrowserRouter>
       <div style={{ minHeight: "100vh", background: "#fafafa", fontFamily: "-apple-system, BlinkMacSystemFont, sans-serif" }}>
+        <Layout />
         <Routes>
           <Route path="/" element={<Gallery />} />
           <Route path="/em" element={<EMCalculator />} />
